@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>A Pretty Strange Game</title>
+    <style>
+        #play-new-game-button {
+            background-color: #dddddd;
+            border: 3px solid black;
+            padding: 16px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            font-size: 14px;
+            font-weight: bolder;
+
+            margin: 25px auto;
+        }
+
+        #results-wrapper {
+            font-family: Consolas, serif;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #results-table, #results-table tr, #results-table tr th, #results-table tr td {
+            padding: 10px;
+            border: 3px solid black;
+            border-collapse: collapse;
+            background-color: #dddddd;
+        }
+    </style>
+    <script>
+        "use strict";
+
+        const EMPTY_GRID = [];
+        const EMPTY_ROW = [];
+        const EMPTY_COLUMN = 0;
+
+        const ROW_QUANTITY = 10;
+        const COLUMN_QUANTITY = 10;
+
+        const MINIMUM_ROW_INDEX = 0;
+        const MAXIMUM_ROW_INDEX = ROW_QUANTITY - 1;
+        const MINIMUM_COLUMN_INDEX = 0;
+        const MAXIMUM_COLUMN_INDEX = COLUMN_QUANTITY - 1;
+
+        const MAXIMUM_TOUCHES_ALLOWED = 1000000;
+
+        const MARKER_STARTING_ROW = MAXIMUM_ROW_INDEX;
+        const MARKER_STARTING_COLUMN = 0;
+
+        const MARKER_END_GAME_ROW = 0;
+        const MARKER_END_GAME_COLUMN = MAXIMUM_COLUMN_INDEX;
+
+        const DIRECTION_LEFT = 0;
+        const DIRECTION_UP = 1;
+        const DIRECTION_RIGHT = 2;
+        const DIRECTION_DOWN = 3;
+        const DIRECTIONS = [DIRECTION_LEFT, DIRECTION_UP, DIRECTION_RIGHT, DIRECTION_DOWN];
+        const DIRECTION_QUANTITY = DIRECTIONS.length;
+
+        const DISTANCE_ZERO = 0;
+        const DISTANCE_ONE = 1;
+        const DISTANCE_TWO = 2;
+        const DISTANCES = [DISTANCE_ZERO, DISTANCE_ONE, DISTANCE_TWO];
+        const DISTANCE_QUANTITY = DISTANCES.length;
+
+        const GAME_SUCCESS = true;
+        const GAME_FAILURE = false;
+
+        const EMPTY_GAME = {
+            "grid": undefined,
+            "marker": {
+                "position": {
+                    "row": undefined,
+                    "column": undefined
+                }
+            },
+            "touches": 0,
+            "results": {
+                "maximumTouches": undefined,
+                "minimumTouches": undefined,
+                "averageTouchesPerCell": undefined,
+                "outcome": undefined,
+                "totalTouches": undefined
+            }
+        };
+
+        const EMPTY_MOVE = {
+            "direction": undefined,
+            "distance": undefined
+        };
+
+        function playNewGame() {
+            let game = JSON.parse(JSON.stringify(EMPTY_GAME));
+
+            game = setupGame(game);
+
+            game = playGame(game);
+
+            game = calculateResults(game);
+
+            printResults(game);
+        }
+
+        function setupGame(game) {
+            game.grid = createGrid(ROW_QUANTITY, COLUMN_QUANTITY);
+            game = placeMarkerAndRecordTouchAt(game, MARKER_STARTING_ROW, MARKER_STARTING_COLUMN);
+
+            return game;
+        }
+
+        function createGrid(rowQuantity, columnQuantity) {
+            let grid = JSON.parse(JSON.stringify(EMPTY_GRID));
+
+            grid = addRowsAndColumnsToGrid(grid, rowQuantity, columnQuantity);
+
+            return grid;
+        }
+
+        function addRowsAndColumnsToGrid(grid, rowQuantity, columnQuantity) {
+            for (let rowIndex = 0; rowIndex < rowQuantity; rowIndex++) {
+                grid = addNewRow(grid);
+                grid[rowIndex] = addColumnsToRow(grid[rowIndex], columnQuantity);
+            }
+
+            return grid;
+        }
+
+        function addNewRow(grid) {
+            grid.push(JSON.parse(JSON.stringify(EMPTY_ROW)));
+
+            return grid;
+        }
+
+        function addColumnsToRow(gridRow, columnQuantity) {
+            for (let columnIndex = 0; columnIndex < columnQuantity; columnIndex++) {
+                gridRow = addNewColumnToRow(gridRow);
+            }
+
+            return gridRow;
+        }
+
+        function addNewColumnToRow(gridRow) {
+            gridRow.push(JSON.parse(JSON.stringify(EMPTY_COLUMN)));
+
+            return gridRow;
+        }
+
+        function placeMarkerAndRecordTouchAt(game, row, column) {
+            game = placeMarkerAt(game, row, column);
+            game = recordTouchAt(game, row, column);
+
+            return game;
+        }
+
+        function placeMarkerAt(game, row, column) {
+            game.marker.position.row = row;
+            game.marker.position.column = column;
+
+            return game;
+        }
+
+        function recordTouchAt(game, row, column) {
+            game = incrementTotalTouches(game);
+            game = incrementTouchCountAt(game, row, column);
+
+            return game;
+        }
+
+        function incrementTotalTouches(game) {
+            game.touches++;
+
+            return game;
+        }
+
+        function incrementTouchCountAt(game, row, column) {
+            game.grid[row][column]++;
+
+            return game;
+        }
+
+        function playGame(game) {
+            while (shouldContinuePlayingGame(game)) {
+                game = continuePlayingGame(game);
+            }
+
+            return game;
+        }
+
+        function shouldContinuePlayingGame(game) {
+            return !gameIsWon(game) && !gameIsBeyondMaximumTouches(game);
+        }
+
+        function gameIsWon(game) {
+            return markerIsInWinningPosition(game.marker);
+        }
+
+        function markerIsInWinningPosition(marker) {
+            return markerIsInWinningRow(marker) && markerIsInWinningColumn(marker);
+        }
+
+        function markerIsInWinningRow(marker) {
+            return marker.position.row === MARKER_END_GAME_ROW;
+        }
+
+        function markerIsInWinningColumn(marker) {
+            return marker.position.column === MARKER_END_GAME_COLUMN;
+        }
+
+        function gameIsBeyondMaximumTouches(game) {
+            return game.touches >= MAXIMUM_TOUCHES_ALLOWED;
+        }
+
+        function continuePlayingGame(game) {
+            let move = generateRandomMove();
+            let originalMarkerLocation = JSON.parse(JSON.stringify(game.marker.position));
+
+            if (thisMoveDoesNotPutMarkerOutsideOfGrid(move, game.marker)) {
+                game = placeMarkerAtPositionFromMove(move, game);
+            } else {
+                game = placeMarkerAtOriginalLocation(game, originalMarkerLocation);
+            }
+
+            return game;
+        }
+
+        function generateRandomMove() {
+            let move = EMPTY_MOVE;
+
+            move.direction = generateRandomDirection();
+            move.distance = generateRandomDistance();
+
+            return move;
+        }
+
+        function generateRandomDirection() {
+            return DIRECTIONS[getRandomIntegerBetween(0, DIRECTION_QUANTITY)];
+        }
+
+        function getRandomIntegerBetween(lowerBound, upperBound) {
+            return lowerBound + Math.floor(Math.random() * upperBound)
+        }
+
+        function generateRandomDistance() {
+            return DISTANCES[getRandomIntegerBetween(0, DISTANCE_QUANTITY)];
+        }
+
+        function thisMoveDoesNotPutMarkerOutsideOfGrid(move, marker) {
+            let potentialNewMarkerPosition = getMarkerPositionAfterThisMove(move, marker);
+
+            return potentialNewMarkerPosition.row <= MAXIMUM_ROW_INDEX && potentialNewMarkerPosition.row >= MINIMUM_ROW_INDEX && potentialNewMarkerPosition.column <= MAXIMUM_COLUMN_INDEX && potentialNewMarkerPosition.column >= MINIMUM_COLUMN_INDEX;
+        }
+
+        function getMarkerPositionAfterThisMove(move, marker) {
+            let markerPositionAfterThisMove = {
+                "row": undefined,
+                "column": undefined
+            };
+
+            switch (move.direction) {
+                case DIRECTION_LEFT:
+                    markerPositionAfterThisMove.row = marker.position.row - move.distance;
+                    markerPositionAfterThisMove.column = marker.position.column;
+                    break;
+                case DIRECTION_UP:
+                    markerPositionAfterThisMove.row = marker.position.row;
+                    markerPositionAfterThisMove.column = marker.position.column - move.distance;
+                    break;
+                case DIRECTION_RIGHT:
+                    markerPositionAfterThisMove.row = marker.position.row + move.distance;
+                    markerPositionAfterThisMove.column = marker.position.column;
+                    break;
+                case DIRECTION_DOWN:
+                    markerPositionAfterThisMove.row = marker.position.row;
+                    markerPositionAfterThisMove.column = marker.position.column + move.distance;
+                    break;
+                default:
+                    throw new Error("Unrecognized move direction encountered: \"" + move.direction + "\".");
+            }
+
+            return markerPositionAfterThisMove;
+        }
+
+        function placeMarkerAtPositionFromMove(move, game) {
+            let newMarkerPosition = getMarkerPositionAfterThisMove(move, game.marker);
+            game = placeMarkerAndRecordTouchAt(game, newMarkerPosition.row, newMarkerPosition.column);
+
+            return game;
+        }
+
+        function placeMarkerAtOriginalLocation(game, originalMarkerLocation) {
+            game = placeMarkerAndRecordTouchAt(game, originalMarkerLocation.row, originalMarkerLocation.column);
+
+            return game;
+        }
+
+        function calculateResults(game) {
+            console.log(game);
+
+            game = calculateOutcome(game);
+            game = calculateMaximumTouches(game);
+            game = calculateMinimumTouches(game);
+            game = calculateAverageTouchesPerCell(game);
+            game = calculateTotalTouches(game);
+
+            return game;
+        }
+
+        function calculateOutcome(game) {
+            if (gameIsWon(game)) {
+                game.results.outcome = GAME_SUCCESS
+            } else if (gameIsBeyondMaximumTouches(game)) {
+                game.results.outcome = GAME_FAILURE
+            } else {
+                alert("Unexpected end of game encountered. Consult the console to view the game object.");
+                console.error(game);
+                throw new Error("Unexpected end of game encountered.");
+            }
+
+            return game;
+        }
+
+        function calculateMaximumTouches(game) {
+            game.results.maximumTouches = findMaximumTouchesInGrid(game.grid);
+
+            return game;
+        }
+
+        function findMaximumTouchesInGrid(grid) {
+            let maximumTouchedInGrid = 0;
+
+            grid.forEach(
+                (row) => {
+                    row.forEach(
+                        (touchesInCell) => {
+                            if (touchesInCell > maximumTouchedInGrid) {
+                                maximumTouchedInGrid = touchesInCell;
+                            }
+                        }
+                    );
+                }
+            );
+
+            return maximumTouchedInGrid;
+        }
+
+
+        function calculateMinimumTouches(game) {
+            game.results.minimumTouches = findMinimumTouchesInGrid(game.grid);
+
+            return game;
+        }
+
+        function findMinimumTouchesInGrid(grid) {
+            let minimumTouchedInGrid = MAXIMUM_TOUCHES_ALLOWED;
+
+            grid.forEach(
+                (row) => {
+                    row.forEach(
+                        (touchesInCell) => {
+                            if (touchesInCell < minimumTouchedInGrid) {
+                                minimumTouchedInGrid = touchesInCell;
+                            }
+                        }
+                    );
+                }
+            );
+
+            return minimumTouchedInGrid;
+        }
+
+        function calculateAverageTouchesPerCell(game) {
+            game.results.averageTouchesPerCell = findAverageTouchesPerCellInGrid(game.grid);
+
+            return game;
+        }
+
+        function findAverageTouchesPerCellInGrid(grid) {
+            let totalTouches = 0;
+
+            grid.forEach(
+                (row) => {
+                    row.forEach(
+                        (touchesInCell) => {
+                            totalTouches += touchesInCell;
+                        }
+                    );
+                }
+            );
+
+            return (totalTouches / (ROW_QUANTITY * COLUMN_QUANTITY)).toFixed(2);
+        }
+
+        function calculateTotalTouches(game) {
+            game.results.totalTouches = game.touches;
+
+            return game;
+        }
+
+        function printResults(game) {
+            document.getElementById("results-wrapper").innerHTML = `
+                    <table id="results-table" align="center">
+                        <tr>
+                            <th colspan="2">Results</th>
+                        </tr>
+                        <tr>
+                            <th>Type</th>
+                            <th>Value</th>
+                        </tr>
+                        <tr>
+                            <td>Outcome</td>
+                            <td>` + (game.results.outcome === GAME_SUCCESS ? `The marker is now in the correct position.` : `The game surpassed the maximum amount of turns allowed and failed to push the marker to the correct position.`) + `</td>
+                        </tr>
+                        <tr>
+                            <td>Maximum Touches in a Cell</td>
+                            <td>` + game.results.maximumTouches + `</td>
+                        </tr>
+                        <tr>
+                            <td>Minimum Touches in a Cell</td>
+                            <td>` + game.results.minimumTouches + `</td>
+                        </tr>
+                        <tr>
+                            <td>Average Touches per Cell</td>
+                            <td>` + game.results.averageTouchesPerCell + `</td>
+                        </tr>
+                        <tr>
+                            <td>Total Touches</td>
+                            <td>` + game.results.totalTouches + `</td>
+                        </tr>
+                    </table>
+            `;
+        }
+    </script>
+</head>
+<body>
+<button id="play-new-game-button" onClick="playNewGame();">Play New Game</button>
+<div id="results-wrapper">
+</div>
+</body>
+</html>
