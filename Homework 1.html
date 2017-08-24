@@ -1,3 +1,5 @@
+<!-- Charles Justin Reusnow • 25 August 2017 • CMP SCI 4500 • Homework 1 -->
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -31,6 +33,10 @@
         }
     </style>
     <script>
+        // Charles Justin Reusnow • 25 August 2017 • CMP SCI 4500 • Homework 1
+
+        //TODO Opening Comment
+
         "use strict";
 
         const EMPTY_GRID = [];
@@ -92,18 +98,27 @@
             "distance": undefined
         };
 
+        /**
+         * Purpose:
+         * Inputs: None.
+         * Output: None.
+         * Assumptions:
+         * */
         function playNewGame() {
             let game = JSON.parse(JSON.stringify(EMPTY_GAME));
 
             game = setupGame(game);
-
             game = playGame(game);
-
             game = calculateResults(game);
-
             printResults(game);
         }
 
+        /**
+         * Purpose:
+         * Inputs: game - The game object to be set up.
+         * Output: game - The game object which was set up.
+         * Assumptions:
+         * */
         function setupGame(game) {
             game.grid = createGrid(ROW_QUANTITY, COLUMN_QUANTITY);
             game = placeMarkerAndRecordTouchAt(game, MARKER_STARTING_ROW, MARKER_STARTING_COLUMN);
@@ -111,6 +126,14 @@
             return game;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * * rowQuantity - The number of rows to put in this grid.
+         * * columnQuantity - The number of columns to put in this grid.
+         * Output: grid - The newly created grid.
+         * Assumptions:
+         * */
         function createGrid(rowQuantity, columnQuantity) {
             let grid = JSON.parse(JSON.stringify(EMPTY_GRID));
 
@@ -119,6 +142,12 @@
             return grid;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function addRowsAndColumnsToGrid(grid, rowQuantity, columnQuantity) {
             for (let rowIndex = 0; rowIndex < rowQuantity; rowIndex++) {
                 grid = addNewRow(grid);
@@ -128,12 +157,24 @@
             return grid;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function addNewRow(grid) {
             grid.push(JSON.parse(JSON.stringify(EMPTY_ROW)));
 
             return grid;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function addColumnsToRow(gridRow, columnQuantity) {
             for (let columnIndex = 0; columnIndex < columnQuantity; columnIndex++) {
                 gridRow = addNewColumnToRow(gridRow);
@@ -142,12 +183,24 @@
             return gridRow;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function addNewColumnToRow(gridRow) {
             gridRow.push(JSON.parse(JSON.stringify(EMPTY_COLUMN)));
 
             return gridRow;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function placeMarkerAndRecordTouchAt(game, row, column) {
             game = placeMarkerAt(game, row, column);
             game = recordTouchAt(game, row, column);
@@ -155,6 +208,12 @@
             return game;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function placeMarkerAt(game, row, column) {
             game.marker.position.row = row;
             game.marker.position.column = column;
@@ -162,6 +221,12 @@
             return game;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function recordTouchAt(game, row, column) {
             game = incrementTotalTouches(game);
             game = incrementTouchCountAt(game, row, column);
@@ -169,18 +234,36 @@
             return game;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function incrementTotalTouches(game) {
             game.touches++;
 
             return game;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function incrementTouchCountAt(game, row, column) {
             game.grid[row][column]++;
 
             return game;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function playGame(game) {
             while (shouldContinuePlayingGame(game)) {
                 game = continuePlayingGame(game);
@@ -189,30 +272,72 @@
             return game;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function shouldContinuePlayingGame(game) {
             return !gameIsWon(game) && !gameIsBeyondMaximumTouches(game);
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function gameIsWon(game) {
             return markerIsInWinningPosition(game.marker);
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function markerIsInWinningPosition(marker) {
             return markerIsInWinningRow(marker) && markerIsInWinningColumn(marker);
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function markerIsInWinningRow(marker) {
             return marker.position.row === MARKER_END_GAME_ROW;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function markerIsInWinningColumn(marker) {
             return marker.position.column === MARKER_END_GAME_COLUMN;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function gameIsBeyondMaximumTouches(game) {
             return game.touches >= MAXIMUM_TOUCHES_ALLOWED;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function continuePlayingGame(game) {
             let move = generateRandomMove();
             let originalMarkerLocation = JSON.parse(JSON.stringify(game.marker.position));
@@ -226,6 +351,12 @@
             return game;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function generateRandomMove() {
             let move = EMPTY_MOVE;
 
@@ -235,24 +366,54 @@
             return move;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function generateRandomDirection() {
             return DIRECTIONS[getRandomIntegerBetween(0, DIRECTION_QUANTITY)];
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function getRandomIntegerBetween(lowerBound, upperBound) {
             return lowerBound + Math.floor(Math.random() * upperBound)
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function generateRandomDistance() {
             return DISTANCES[getRandomIntegerBetween(0, DISTANCE_QUANTITY)];
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function thisMoveDoesNotPutMarkerOutsideOfGrid(move, marker) {
             let potentialNewMarkerPosition = getMarkerPositionAfterThisMove(move, marker);
 
             return potentialNewMarkerPosition.row <= MAXIMUM_ROW_INDEX && potentialNewMarkerPosition.row >= MINIMUM_ROW_INDEX && potentialNewMarkerPosition.column <= MAXIMUM_COLUMN_INDEX && potentialNewMarkerPosition.column >= MINIMUM_COLUMN_INDEX;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function getMarkerPositionAfterThisMove(move, marker) {
             let markerPositionAfterThisMove = {
                 "row": undefined,
@@ -283,6 +444,12 @@
             return markerPositionAfterThisMove;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function placeMarkerAtPositionFromMove(move, game) {
             let newMarkerPosition = getMarkerPositionAfterThisMove(move, game.marker);
             game = placeMarkerAndRecordTouchAt(game, newMarkerPosition.row, newMarkerPosition.column);
@@ -290,12 +457,24 @@
             return game;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function placeMarkerAtOriginalLocation(game, originalMarkerLocation) {
             game = placeMarkerAndRecordTouchAt(game, originalMarkerLocation.row, originalMarkerLocation.column);
 
             return game;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function calculateResults(game) {
             console.log(game);
 
@@ -308,6 +487,12 @@
             return game;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function calculateOutcome(game) {
             if (gameIsWon(game)) {
                 game.results.outcome = GAME_SUCCESS
@@ -322,12 +507,24 @@
             return game;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function calculateMaximumTouches(game) {
             game.results.maximumTouches = findMaximumTouchesInGrid(game.grid);
 
             return game;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function findMaximumTouchesInGrid(grid) {
             let maximumTouchedInGrid = 0;
 
@@ -347,12 +544,24 @@
         }
 
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function calculateMinimumTouches(game) {
             game.results.minimumTouches = findMinimumTouchesInGrid(game.grid);
 
             return game;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function findMinimumTouchesInGrid(grid) {
             let minimumTouchedInGrid = MAXIMUM_TOUCHES_ALLOWED;
 
@@ -371,12 +580,24 @@
             return minimumTouchedInGrid;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function calculateAverageTouchesPerCell(game) {
             game.results.averageTouchesPerCell = findAverageTouchesPerCellInGrid(game.grid);
 
             return game;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function findAverageTouchesPerCellInGrid(grid) {
             let totalTouches = 0;
 
@@ -393,12 +614,24 @@
             return (totalTouches / (ROW_QUANTITY * COLUMN_QUANTITY)).toFixed(2);
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function calculateTotalTouches(game) {
             game.results.totalTouches = game.touches;
 
             return game;
         }
 
+        /**
+         * Purpose:
+         * Inputs:
+         * Output:
+         * Assumptions:
+         * */
         function printResults(game) {
             document.getElementById("results-wrapper").innerHTML = `
                     <table id="results-table" align="center">
