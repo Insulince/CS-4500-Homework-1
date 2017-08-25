@@ -1,4 +1,5 @@
 <!-- Charles Justin Reusnow • 25 August 2017 • CMP SCI 4500 • Homework 1 -->
+<!-- You can find my opening comment at the beginning of the script tag in the head of the HTML document described below. -->
 
 <!DOCTYPE html>
 <html>
@@ -35,7 +36,16 @@
     <script>
         // Charles Justin Reusnow • 25 August 2017 • CMP SCI 4500 • Homework 1
 
-        //TODO Opening Comment
+        /* TODO Opening Comment */
+
+        /* Global Assumptions.
+         * Any function which references the "game" variable outside of the function "resetGame", expects it to be defined as a global variable, and as a copy of "EMPTY_GAME", with varying levels of defined values. */
+
+        /* Common Assumptions.
+         * I found myself writing some of the same assumptions repeatedly, so I decided to write shorthand identifiers for them and just use the identifier to reference the concept in the assumptions section.
+         * #A = The function "setupGame" was already called.
+         * #B = "move" is an object composed of at least "direction" and "distance" members, where "direction" contains a value belonging to the "DIRECTIONS" array and "distance" contains a value belonging to the "DISTANCES" array.
+         * #C = "position" is an object composed of at least "row" and "column" members, where "row" and "column" are both whole numbers. */
 
         "use strict";
 
@@ -75,6 +85,9 @@
         const GAME_SUCCESS = true;
         const GAME_FAILURE = false;
 
+        const GAME_SUCCESS_MESSAGE = "The marker is now in the correct position.";
+        const GAME_FAILURE_MESSAGE = "The game surpassed the maximum amount of turns allowed and failed to push the marker to the correct position.";
+
         const EMPTY_GAME = {
             "grid": undefined,
             "marker": {
@@ -105,12 +118,10 @@
 
         let game = undefined;
 
-        /**
-         * Purpose:
+        /* Purpose: Entry point to the rest of the logic of this game, it is triggered when the user clicks the "Play New Game" button.
          * Inputs: None.
          * Output: None.
-         * Assumptions:
-         * */
+         * Assumptions: None. */
         function playNewGame() {
             resetGame();
             setupGame();
@@ -119,66 +130,56 @@
             printResults();
         }
 
-        /**
-         * Purpose:
+        /* Purpose: Ensures the game always starts as a fresh game with no previous values carried over.
          * Inputs: None.
          * Output: None.
-         * Assumptions:
-         * */
+         * Assumptions: None. */
         function resetGame() {
             game = deepCopy(EMPTY_GAME);
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Takes an object and copies it to a brand new object to avoid passing by reference. This is accomplished by turning the object into a JSON string and then bringing it back to an object, thereby removing any references to a previous object.
+         * Inputs: "object" - The entity you wish to deep copy.
+         * Output: a completely separate copy of "object".
+         * Assumptions: "object" is not a self-referential object, nor an object which leads to circular references. Failure to adhere to these assumptions leads to JSON.stringify failing. */
         function deepCopy(object) {
             return JSON.parse(JSON.stringify(object));
         }
 
-        /**
-         * Purpose:
+        /* Purpose: Preforms initial setup of the game by creating the grid and placing the marker in the starting position.
          * Inputs: None.
          * Output: None.
-         * Assumptions:
-         * */
+         * Assumptions: The function "resetGame" was already called. */
         function setupGame() {
             createGrid(ROW_QUANTITY, COLUMN_QUANTITY);
             placeMarkerAndRecordTouchAt(MARKER_STARTING_ROW, MARKER_STARTING_COLUMN);
         }
 
-        /**
-         * Purpose:
+        /* Purpose: Creates the grid for the game.
          * Inputs:
-         * * rowQuantity - The number of rows to put in this grid.
-         * * columnQuantity - The number of columns to put in this grid.
-         * Output: grid - The newly created grid.
-         * Assumptions:
-         * */
+         * • "rowQuantity" - The number of rows to put in this grid.
+         * • "columnQuantity" - The number of columns to put in this grid.
+         * Output: None.
+         * Assumptions: Inputs are all natural numbers. */
         function createGrid(rowQuantity, columnQuantity) {
             resetGrid();
             addRowsAndColumnsToGrid(rowQuantity, columnQuantity);
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Clears the game's grid object to ensure there is no left over values from a previous game.
+         * Inputs: None.
+         * Output: None.
+         * Assumptions: None. */
         function resetGrid() {
             game.grid = deepCopy(EMPTY_GRID);
         }
 
-        /**
-         * Purpose:
+        /* Purpose: Adds the rows and columns to the game's grid object.
          * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+         * • "rowQuantity" - The number of rows to put in this grid.
+         * • "columnQuantity" - The number of columns to put in this grid.
+         * Output: None.
+         * Assumptions: Inputs are all natural numbers. */
         function addRowsAndColumnsToGrid(rowQuantity, columnQuantity) {
             for (let rowIndex = 0; rowIndex < rowQuantity; rowIndex++) {
                 addNewRow();
@@ -186,169 +187,147 @@
             }
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Adds a new row to the game's grid object.
+         * Inputs: None.
+         * Output: None.
+         * Assumptions: "game.grid" is an array. */
         function addNewRow() {
             game.grid.push(deepCopy(EMPTY_ROW));
         }
 
-        /**
-         * Purpose:
+        /* Purpose: Adds all the columns to the game's grid object's current row.
          * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+         * • "rowIndex" - The current row of the grid which we are filling with columns.
+         * • "columnQuantity" - The number of columns to put in this row.
+         * Output: None.
+         * Assumptions: "rowIndex" is a whole number, "columnQuantity" is a natural number. */
         function addColumnsToRow(rowIndex, columnQuantity) {
             for (let columnIndex = 0; columnIndex < columnQuantity; columnIndex++) {
                 addNewColumnToRow(rowIndex);
             }
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Adds a new column to the game's grid object's current row.
+         * Inputs: "rowIndex" - The current row of the grid which we are adding a column to.
+         * Output: None.
+         * Assumptions: "rowIndex" is a whole number, "game.grid[rowIndex]" is an array. */
         function addNewColumnToRow(rowIndex) {
             game.grid[rowIndex].push(deepCopy(EMPTY_COLUMN));
         }
 
-        /**
-         * Purpose:
+        /* Purpose: Places the marker at the provided row and column, and records the touch it creates in being placed.
          * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+         * • "row" - The row to place the marker and record the touch at.
+         * • "column" - The column to place the marker and record the touch at.
+         * Output: None.
+         * Assumptions: Inputs are all whole numbers. */
         function placeMarkerAndRecordTouchAt(row, column) {
             placeMarkerAt(row, column);
             recordTouchAt(row, column);
         }
 
-        /**
-         * Purpose:
+        /* Purpose: Places the marker at the provided row and column.
          * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+         * • "row" - The row to place the marker at.
+         * • "column" - The column to place the marker at.
+         * Output: None.
+         * Assumptions: Inputs are all whole numbers. */
         function placeMarkerAt(row, column) {
             game.marker.position.row = row;
             game.marker.position.column = column;
         }
 
-        /**
-         * Purpose:
+        /* Purpose: Records the touch at the provided row and column, and also in the running total.
          * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+         * • "row" - The row to record the touch at.
+         * • "column" - The column to record the touch at.
+         * Output: None.
+         * Assumptions: Inputs are all whole numbers. */
         function recordTouchAt(row, column) {
             incrementTotalTouches();
             incrementTouchCountAt(row, column);
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Increments the game's total touches.
+         * Inputs: None.
+         * Output: None.
+         * Assumptions: "game.touches" is an integer. */
         function incrementTotalTouches() {
             game.touches++;
         }
 
-        /**
-         * Purpose:
+        /* Purpose: Increments the game's grid object's touch count at the provided row and column.
          * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+         * • "row" - The row to record the touch at.
+         * • "column" - The column to record the touch at.
+         * Output: None.
+         * Assumptions: Inputs are all whole numbers and "game.grid[row][column] is an integer. */
         function incrementTouchCountAt(row, column) {
             game.grid[row][column]++;
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Plays the game.
+         * Inputs: None.
+         * Output: None.
+         * Assumptions: #A. */
         function playGame() {
             while (shouldContinuePlayingGame()) {
                 continuePlayingGame();
             }
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Determines whether the game is over or if it should continue playing. This is determined by checking if the win condition (marker is in winning position) or lose condition (too many moves) has been met.
+         * Inputs: None.
+         * Output: A boolean indicating whether the game should continue playing or not.
+         * Assumptions: #A. */
         function shouldContinuePlayingGame() {
             return !gameIsWon() && !gameIsBeyondMaximumTouches();
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Determines whether the game has been won or not.
+         * Inputs: None.
+         * Output: A boolean indicating whether the game has been won or not.
+         * Assumptions: #A. */
         function gameIsWon() {
             return markerIsInWinningPosition();
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Determines whether the marker is in the winning position or not.
+         * Inputs: None.
+         * Output: A boolean indicating whether the marker is in the winning position or not.
+         * Assumptions: #A. */
         function markerIsInWinningPosition() {
             return markerIsInWinningRow() && markerIsInWinningColumn();
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Determines whether the marker is in the winning row or not.
+         * Inputs: None.
+         * Output: A boolean indicating whether the marker is in the winning row or not.
+         * Assumptions: #A. */
         function markerIsInWinningRow() {
             return game.marker.position.row === MARKER_END_GAME_ROW;
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Determines whether the marker is in the winning column or not.
+         * Inputs: None.
+         * Output: A boolean indicating whether the marker is in the winning column or not.
+         * Assumptions: #A. */
         function markerIsInWinningColumn() {
             return game.marker.position.column === MARKER_END_GAME_COLUMN;
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Determines whether the game has surpassed the maximum amount of touches or not.
+         * Inputs: None.
+         * Output: A boolean indicating whether the game has surpassed the maximum amount of touches or not.
+         * Assumptions: #A. */
         function gameIsBeyondMaximumTouches() {
             return game.touches >= MAXIMUM_TOUCHES_ALLOWED;
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Run the game through another iteration. Each iteration is composed of generating a move, recording the marker's original position, determining if the generated move is valid, and moving the marker accordingly.
+         * Inputs: None.
+         * Output: None.
+         * Assumptions: #A. */
         function continuePlayingGame() {
             let move = generateRandomMove();
             let originalMarkerLocation = deepCopy(game.marker.position);
@@ -360,12 +339,10 @@
             }
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Creates a random move to apply to the marker.
+         * Inputs: None.
+         * Output: A randomly generated move.
+         * Assumptions: None. */
         function generateRandomMove() {
             let move = deepCopy(EMPTY_MOVE);
 
@@ -375,104 +352,86 @@
             return move;
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Selects a random direction from the direction array.
+         * Inputs: None.
+         * Output: A randomly chosen direction from the direction array.
+         * Assumptions: None. */
         function generateRandomDirection() {
             return DIRECTIONS[getRandomIntegerBetween(0, DIRECTION_QUANTITY)];
         }
 
-        /**
-         * Purpose:
+        /* Purpose: Creates a random integer between two values.
          * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+         * • "lowerBound" - A number indicating the inclusive lower bound for the range of random integers to generate.
+         * • "upperBound" - A number indicating the inclusive upper bound for the range of random integers to generate.
+         * Output: A random integer that falls between "lowerBound" and "upperBound" inclusive.
+         * Assumptions: Inputs are all integers. "lowerBound" <= "upperBound". */
         function getRandomIntegerBetween(lowerBound, upperBound) {
             return lowerBound + Math.floor(Math.random() * upperBound)
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Selects a random distance from the distance array.
+         * Inputs: None.
+         * Output: A randomly chosen distance from the distance array.
+         * Assumptions: None. */
         function generateRandomDistance() {
             return DISTANCES[getRandomIntegerBetween(0, DISTANCE_QUANTITY)];
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Determines whether the provided move would put the marker outside of the grid or not. This is accomplished by getting the position the marker would be in if the provided move were applied, then checking if that position is in the grid still.
+         * Inputs: "move" - The move object containing both a direction and a distance.
+         * Output: A boolean indicating whether the provided move would put the marker outside of the grid or not.
+         * Assumptions: #A. #B. */
         function thisMoveDoesNotPutMarkerOutsideOfGrid(move) {
             let potentialNewMarkerPosition = getMarkerPositionAfterThisMove(move);
 
             return positionIsWithinGrid(potentialNewMarkerPosition);
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Determines whether the provided position is within the grid or not. This is accomplished by checking all four bounds of the gird for any breaches.
+         * Inputs: "position" - The position object containing both a row and a column.
+         * Output: A boolean indicating whether the provided position is within the grid.
+         * Assumptions: #C. */
         function positionIsWithinGrid(position) {
             return positionIsWithinLeftBound(position) && positionIsWithinTopBound(position) && positionIsWithinRightBound(position) && positionIsWithinBottomBound(position);
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Determines whether the provided position is within the left bound of the grid.
+         * Inputs: "position" - The position object containing both a row and a column.
+         * Output: A boolean indicating whether the provided position is within the left bound of the grid.
+         * Assumptions: #C. */
         function positionIsWithinLeftBound(position) {
             return position.column >= MINIMUM_COLUMN_INDEX;
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Determines whether the provided position is within the top bound of the grid.
+         * Inputs: "position" - The position object containing both a row and a column.
+         * Output: A boolean indicating whether the provided position is within the top bound of the grid.
+         * Assumptions: #C. */
         function positionIsWithinTopBound(position) {
             return position.row >= MINIMUM_ROW_INDEX;
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Determines whether the provided position is within the right bound of the grid.
+         * Inputs: "position" - The position object containing both a row and a column.
+         * Output: A boolean indicating whether the provided position is within the right bound of the grid.
+         * Assumptions: #C. */
         function positionIsWithinRightBound(position) {
             return position.column <= MAXIMUM_COLUMN_INDEX;
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Determines whether the provided position is within the bottom bound of the grid.
+         * Inputs: "position" - The position object containing both a row and a column.
+         * Output: A boolean indicating whether the provided position is within the bottom bound of the grid.
+         * Assumptions: #C. */
         function positionIsWithinBottomBound(position) {
             return position.row <= MAXIMUM_ROW_INDEX;
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Gets the position of the marker after the provided move is applied to it.
+         * Inputs: "move" - The move object containing both a direction and a distance.
+         * Output: A position object containing a row and column fields which correspond to the position the marker would be in, should the provided move object be applied to it.
+         * Assumptions: #A. #B. Failure to adhere to assumption #B leads to the default case of the switch statement executing which leads to an error being thrown. */
         function getMarkerPositionAfterThisMove(move) {
             let markerPositionAfterThisMove = deepCopy(EMPTY_POSITION);
 
@@ -500,12 +459,10 @@
             return markerPositionAfterThisMove;
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Gets the distance as a number represented in the provided move object.
+         * Inputs: "move" - The move object containing both a direction and a distance.
+         * Output: The distance as an integer that the move object contains.
+         * Assumptions: #B. Failure to adhere to assumption #B leads to the default case of the switch statement executing which leads to an error being thrown. */
         function getMoveDistance(move) {
             let distance = undefined;
 
@@ -526,33 +483,27 @@
             return distance;
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Puts the marker at its new position after the provided move is applied to it.
+         * Inputs: "move" - The move object containing both a direction and a distance.
+         * Output: None.
+         * Assumptions: #B. The function "getMarkerPositionAfterThisMove" returns a valid position object, resembling the object described in #C. */
         function placeMarkerAtPositionFromMove(move) {
             let newMarkerPosition = getMarkerPositionAfterThisMove(move);
             placeMarkerAndRecordTouchAt(newMarkerPosition.row, newMarkerPosition.column);
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Puts the marker at its original position because the move generated earlier would put the marker off the grid.
+         * Inputs: "originalMarkerLocation" - A position object containing the original position of the marker before a move is executed.
+         * Output: None.
+         * Assumptions: "originalMarkerLocation" resembles the object described in #C. */
         function placeMarkerAtOriginalLocation(originalMarkerLocation) {
             placeMarkerAndRecordTouchAt(originalMarkerLocation.row, originalMarkerLocation.column);
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Calculates the results of the game and stores them in the game object.
+         * Inputs: None.
+         * Output: None.
+         * Assumptions: #A. */
         function calculateResults() {
             calculateOutcome();
             calculateMaximumTouches();
@@ -561,12 +512,10 @@
             calculateTotalTouches();
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Calculates the outcome of the game and stores it in the game object.
+         * Inputs: None.
+         * Output: None.
+         * Assumptions: #A. The game has either reached a winning condition or has surpassed the maximum amount of touches allowed. Failure to adhere to the previous assumption leads to an error being thrown. */
         function calculateOutcome() {
             if (gameIsWon()) {
                 game.results.outcome = GAME_SUCCESS
@@ -577,22 +526,18 @@
             }
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Calculates the maximum touches of the game and stores it in the game object.
+         * Inputs: None.
+         * Output: None.
+         * Assumptions: #A. */
         function calculateMaximumTouches() {
             game.results.maximumTouches = findMaximumTouchesInGrid();
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Preforms the actual calculation of which cell had the most touches.
+         * Inputs: None.
+         * Output: The quantity of touches in the cell that has the most touches.
+         * Assumptions: #A. */
         function findMaximumTouchesInGrid() {
             let maximumTouchedInGrid = 0;
 
@@ -611,23 +556,18 @@
             return maximumTouchedInGrid;
         }
 
-
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Calculates the minimum touches of the game and stores it in the game object.
+         * Inputs: None.
+         * Output: None.
+         * Assumptions: #A. */
         function calculateMinimumTouches() {
             game.results.minimumTouches = findMinimumTouchesInGrid();
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Preforms the actual calculation of which cell had the least touches.
+         * Inputs: None.
+         * Output: The quantity of touches in the cell that has the least touches.
+         * Assumptions: #A. */
         function findMinimumTouchesInGrid() {
             let minimumTouchedInGrid = MAXIMUM_TOUCHES_ALLOWED;
 
@@ -646,22 +586,18 @@
             return minimumTouchedInGrid;
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Calculates the average touches per cell of the game and stores it in the game object.
+         * Inputs: None.
+         * Output: None.
+         * Assumptions: #A. */
         function calculateAverageTouchesPerCell() {
             game.results.averageTouchesPerCell = findAverageTouchesPerCellInGrid();
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Preforms the actual calculation of the average touches per cell.
+         * Inputs: None.
+         * Output: The average quantity of touches across all cells in the grid as a decimal precise to 2 decimal places.
+         * Assumptions: #A. "ROW_QUANTITY * COLUMN_QUANTITY" != 0. */
         function findAverageTouchesPerCellInGrid() {
             let totalTouches = 0;
 
@@ -678,22 +614,18 @@
             return (totalTouches / (ROW_QUANTITY * COLUMN_QUANTITY)).toFixed(2);
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Calculates the total touches of the game and stores it in the game object.
+         * Inputs: None.
+         * Output: None.
+         * Assumptions: #A. */
         function calculateTotalTouches() {
             game.results.totalTouches = game.touches;
         }
 
-        /**
-         * Purpose:
-         * Inputs:
-         * Output:
-         * Assumptions:
-         * */
+        /* Purpose: Writes the results of the game to the document inside the results wrapper.
+         * Inputs: None.
+         * Output: None.
+         * Assumptions: None. Although if the game has not been run, these values will all be undefined. */
         function printResults() {
             document.getElementById("results-wrapper").innerHTML = `
                     <table id="results-table" align="center">
@@ -706,7 +638,7 @@
                         </tr>
                         <tr>
                             <td>Outcome</td>
-                            <td>` + (game.results.outcome === GAME_SUCCESS ? `The marker is now in the correct position.` : `The game surpassed the maximum amount of turns allowed and failed to push the marker to the correct position.`) + `</td>
+                            <td>` + (game.results.outcome === GAME_SUCCESS ? GAME_SUCCESS_MESSAGE : GAME_FAILURE_MESSAGE) + `</td>
                         </tr>
                         <tr>
                             <td>Maximum Touches in a Cell</td>
@@ -732,6 +664,35 @@
 <body>
 <button id="play-new-game-button" onClick="playNewGame();">Play New Game</button>
 <div id="results-wrapper">
+    <table id="results-table" align="center">
+        <tr>
+            <th colspan="2">Results</th>
+        </tr>
+        <tr>
+            <th>Type</th>
+            <th>Value</th>
+        </tr>
+        <tr>
+            <td>Outcome</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Maximum Touches in a Cell</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Minimum Touches in a Cell</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Average Touches per Cell</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Total Touches</td>
+            <td></td>
+        </tr>
+    </table>
 </div>
 </body>
 </html>
